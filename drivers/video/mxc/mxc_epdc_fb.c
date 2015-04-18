@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2013 Freescale Semiconductor, Inc.
+ * Copyright (C) 2010-2014 Freescale Semiconductor, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@
  */
 /*#define DEFAULT_PANEL_HW_INIT*/
 
-#define NUM_SCREENS_MIN	2
+#define NUM_SCREENS_MIN	3
 
 #define EPDC_V1_NUM_LUTS	16
 #define EPDC_V1_MAX_NUM_UPDATES 20
@@ -2023,6 +2023,10 @@ static int epdc_process_update(struct update_data_list *upd_data_list,
 		pxp_upd_region.width = ALIGN(src_upd_region->width + pxp_upd_region.left, 8);
 		pxp_upd_region.height = ALIGN(src_upd_region->height, 8);
 	}
+	if (pxp_upd_region.width == 0 || pxp_upd_region.height == 0) {
+		mutex_unlock(&fb_data->pxp_mutex);
+		return -EINVAL;
+	}
 
 	switch (fb_data->epdc_fb_var.rotate) {
 	case FB_ROTATE_UR:
@@ -3101,6 +3105,22 @@ static int mxc_epdc_fb_ioctl(struct fb_info *info, unsigned int cmd,
 	int ret = -EINVAL;
 
 	switch (cmd) {
+	case MXCFB_WAIT_FOR_VSYNC:
+		{
+			long long timestamp;
+			int delaytime = 1000/15;
+			mdelay(delaytime);
+			timestamp = delaytime*1000000 +
+				ktime_to_ns(ktime_get());
+			ret = 0;
+			if ((ret == 0) && copy_to_user((void *)arg,
+					&timestamp, sizeof(timestamp))) {
+				ret = -EFAULT;
+				break;
+			}
+		}
+
+		break;
 	case MXCFB_SET_WAVEFORM_MODES:
 		{
 			struct mxcfb_waveform_modes modes;
@@ -3384,6 +3404,7 @@ static int mxc_epdc_fb_pan_display(struct fb_var_screeninfo *var,
 	if (y_bottom > info->var.yres_virtual)
 		return -EINVAL;
 
+	mutex_lock(&fb_data->pxp_mutex);
 	mutex_lock(&fb_data->queue_mutex);
 
 	fb_data->fb_offset = (var->yoffset * var->xres_virtual + var->xoffset)
@@ -3398,6 +3419,7 @@ static int mxc_epdc_fb_pan_display(struct fb_var_screeninfo *var,
 		info->var.vmode &= ~FB_VMODE_YWRAP;
 
 	mutex_unlock(&fb_data->queue_mutex);
+	mutex_unlock(&fb_data->pxp_mutex);
 
 	return 0;
 }
