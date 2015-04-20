@@ -1051,7 +1051,6 @@ static void epdc_init_settings(struct mxc_epdc_fb_data *fb_data)
 
 static void epdc_powerup(struct mxc_epdc_fb_data *fb_data)
 {
-	int ret = 0;
 	mutex_lock(&fb_data->power_mutex);
 
 	/*
@@ -1071,13 +1070,6 @@ static void epdc_powerup(struct mxc_epdc_fb_data *fb_data)
 	fb_data->updates_active = true;
 
 	/* Enable the v3p3 regulator */
-	ret = regulator_enable(fb_data->v3p3_regulator);
-	if (IS_ERR((void *)ret)) {
-		dev_err(fb_data->dev, "Unable to enable V3P3 regulator."
-			"err = 0x%x\n", ret);
-		mutex_unlock(&fb_data->power_mutex);
-		return;
-	}
 
 	msleep(1);
 
@@ -1092,20 +1084,6 @@ static void epdc_powerup(struct mxc_epdc_fb_data *fb_data)
 	__raw_writel(EPDC_CTRL_CLKGATE, EPDC_CTRL_CLEAR);
 
 	/* Enable power to the EPD panel */
-	ret = regulator_enable(fb_data->display_regulator);
-	if (IS_ERR((void *)ret)) {
-		dev_err(fb_data->dev, "Unable to enable DISPLAY regulator."
-			"err = 0x%x\n", ret);
-		mutex_unlock(&fb_data->power_mutex);
-		return;
-	}
-	ret = regulator_enable(fb_data->vcom_regulator);
-	if (IS_ERR((void *)ret)) {
-		dev_err(fb_data->dev, "Unable to enable VCOM regulator."
-			"err = 0x%x\n", ret);
-		mutex_unlock(&fb_data->power_mutex);
-		return;
-	}
 
 	fb_data->power_state = POWER_STATE_ON;
 
@@ -1128,8 +1106,6 @@ static void epdc_powerdown(struct mxc_epdc_fb_data *fb_data)
 	dev_dbg(fb_data->dev, "EPDC Powerdown\n");
 
 	/* Disable power to the EPD panel */
-	regulator_disable(fb_data->vcom_regulator);
-	regulator_disable(fb_data->display_regulator);
 
 	/* Disable clocks to EPDC */
 	__raw_writel(EPDC_CTRL_CLKGATE, EPDC_CTRL_SET);
@@ -1141,7 +1117,6 @@ static void epdc_powerdown(struct mxc_epdc_fb_data *fb_data)
 		fb_data->pdata->disable_pins();
 
 	/* turn off the V3p3 */
-	regulator_disable(fb_data->v3p3_regulator);
 
 	fb_data->power_state = POWER_STATE_OFF;
 	fb_data->powering_down = false;
@@ -4751,30 +4726,6 @@ int __devinit mxc_epdc_fb_probe(struct platform_device *pdev)
 #endif
 
 	/* get pmic regulators */
-	fb_data->display_regulator = regulator_get(NULL, "DISPLAY");
-	if (IS_ERR(fb_data->display_regulator)) {
-		dev_err(&pdev->dev, "Unable to get display PMIC regulator."
-			"err = 0x%x\n", (int)fb_data->display_regulator);
-		ret = -ENODEV;
-		goto out_irq;
-	}
-	fb_data->vcom_regulator = regulator_get(NULL, "VCOM");
-	if (IS_ERR(fb_data->vcom_regulator)) {
-		regulator_put(fb_data->display_regulator);
-		dev_err(&pdev->dev, "Unable to get VCOM regulator."
-			"err = 0x%x\n", (int)fb_data->vcom_regulator);
-		ret = -ENODEV;
-		goto out_regulator1;
-	}
-	fb_data->v3p3_regulator = regulator_get(NULL, "V3P3");
-	if (IS_ERR(fb_data->v3p3_regulator)) {
-		regulator_put(fb_data->vcom_regulator);
-		regulator_put(fb_data->display_regulator);
-		dev_err(&pdev->dev, "Unable to get V3P3 regulator."
-			"err = 0x%x\n", (int)fb_data->vcom_regulator);
-		ret = -ENODEV;
-		goto out_regulator2;
-	}
 
 	if (device_create_file(info->dev, &fb_attrs[0]))
 		dev_err(&pdev->dev, "Unable to create file from fb_attrs\n");
@@ -4912,11 +4863,8 @@ int __devinit mxc_epdc_fb_probe(struct platform_device *pdev)
 out_lutmap:
 	kfree(fb_data->pxp_conf.proc_data.lut_map);
 out_regulator3:
-	regulator_put(fb_data->v3p3_regulator);
 out_regulator2:
-	regulator_put(fb_data->vcom_regulator);
 out_regulator1:
-	regulator_put(fb_data->display_regulator);
 out_irq:
 	free_irq(fb_data->epdc_irq, fb_data);
 out_dma_work_buf:
@@ -4967,9 +4915,6 @@ static int mxc_epdc_fb_remove(struct platform_device *pdev)
 	flush_workqueue(fb_data->epdc_submit_workqueue);
 	destroy_workqueue(fb_data->epdc_submit_workqueue);
 
-	regulator_put(fb_data->display_regulator);
-	regulator_put(fb_data->vcom_regulator);
-	regulator_put(fb_data->v3p3_regulator);
 
 	unregister_framebuffer(&fb_data->info);
 	free_irq(fb_data->epdc_irq, fb_data);
@@ -5053,10 +4998,6 @@ static void mxc_epdc_fb_shutdown(struct platform_device *pdev)
 	struct mxc_epdc_fb_data *fb_data = platform_get_drvdata(pdev);
 
 	/* Disable power to the EPD panel */
-	if (regulator_is_enabled(fb_data->vcom_regulator))
-		regulator_disable(fb_data->vcom_regulator);
-	if (regulator_is_enabled(fb_data->display_regulator))
-		regulator_disable(fb_data->display_regulator);
 
 	/* Disable clocks to EPDC */
 	clk_enable(fb_data->epdc_clk_axi);
@@ -5070,8 +5011,6 @@ static void mxc_epdc_fb_shutdown(struct platform_device *pdev)
 		fb_data->pdata->disable_pins();
 
 	/* turn off the V3p3 */
-	if (regulator_is_enabled(fb_data->v3p3_regulator))
-		regulator_disable(fb_data->v3p3_regulator);
 }
 #else
 #define mxc_epdc_fb_suspend	NULL

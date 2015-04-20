@@ -87,6 +87,9 @@
 #define MX6SL_BRD_CSI_RST		IMX_GPIO_NR(1, 26)
 /* bt */
 #define MX6SL_BRD_BT_RESET		IMX_GPIO_NR(5, 11)
+/* FocalTech TS */
+#define MX6SL_BRD_CTP_INT		IMX_GPIO_NR(2, 10)
+#define MX6SL_BRD_CTP_RST		IMX_GPIO_NR(4, 4)
 
 static iomux_v3_cfg_t mx6sl_brd_pads[] = {
 
@@ -396,7 +399,10 @@ static iomux_v3_cfg_t mx6sl_brd_elan_pads[] = {
 	MX6SL_PAD_EPDC_PWRCTRL2__GPIO_2_9,	/* CE */
 	MX6SL_PAD_KEY_COL6__GPIO_4_4,		/* RST */
 };
-
+static iomux_v3_cfg_t mx6sl_brd_focaltech_pads[] = {
+	MX6SL_PAD_EPDC_PWRCTRL3__GPIO_2_10,	/* INT */
+	MX6SL_PAD_KEY_COL6__GPIO_4_4,		/* RST */
+};
 static iomux_v3_cfg_t suspend_enter_pads[] = {
 	/* Audio pads. */
 	MX6SL_PAD_AUD_MCLK__GPIO_1_6,

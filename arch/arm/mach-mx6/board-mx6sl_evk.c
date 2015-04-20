@@ -432,7 +432,7 @@ static int __init max17135_regulator_init(struct max17135 *max17135)
 	max17135->gpio_pmic_wakeup = pdata->gpio_pmic_wakeup;
 	max17135->gpio_pmic_v3p3 = pdata->gpio_pmic_v3p3;
 	max17135->gpio_pmic_intr = pdata->gpio_pmic_intr;
-
+/*
 	gpio_request(max17135->gpio_pmic_wakeup, "epdc-pmic-wake");
 	gpio_direction_output(max17135->gpio_pmic_wakeup, 0);
 
@@ -447,7 +447,7 @@ static int __init max17135_regulator_init(struct max17135 *max17135)
 
 	gpio_request(max17135->gpio_pmic_pwrgood, "epdc-pwrstat");
 	gpio_direction_input(max17135->gpio_pmic_pwrgood);
-
+*/
 	max17135->vcom_setup = false;
 	max17135->init_done = false;
 
@@ -760,15 +760,15 @@ static struct fsl_mxc_camera_platform_data camera_data = {
 };
 
 static struct imxi2c_platform_data mx6_evk_i2c0_data = {
-	.bitrate = 100000,
+	.bitrate = 400000,
 };
 
 static struct imxi2c_platform_data mx6_evk_i2c1_data = {
-	.bitrate = 100000,
+	.bitrate = 400000,
 };
 
 static struct imxi2c_platform_data mx6_evk_i2c2_data = {
-	.bitrate = 100000,
+	.bitrate = 400000,
 };
 
 static struct i2c_board_info mxc_i2c0_board_info[] __initdata = {
@@ -787,11 +787,13 @@ static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
 	{
 		I2C_BOARD_INFO("wm8962", 0x1a),
 		.platform_data = &wm8962_config_data,
-	},
-	{
+	}, {
 		I2C_BOARD_INFO("sii902x", 0),
 		.platform_data = &sii902x_hdmi_data,
 		.irq = gpio_to_irq(MX6SL_BRD_EPDC_PWRCTRL3)
+	}, {
+		I2C_BOARD_INFO("ft5x0x_ts", 0x38),
+                .irq = gpio_to_irq(MX6SL_BRD_CTP_INT),
 	},
 };
 
@@ -890,16 +892,16 @@ static int epdc_get_pins(void)
 	ret |= gpio_request(MX6SL_BRD_EPDC_SDDO_7, "epdc_d7");
 	ret |= gpio_request(MX6SL_BRD_EPDC_GDCLK, "epdc_gdclk");
 	ret |= gpio_request(MX6SL_BRD_EPDC_GDSP, "epdc_gdsp");
-	ret |= gpio_request(MX6SL_BRD_EPDC_GDOE, "epdc_gdoe");
-	ret |= gpio_request(MX6SL_BRD_EPDC_GDRL, "epdc_gdrl");
+	//ret |= gpio_request(MX6SL_BRD_EPDC_GDOE, "epdc_gdoe");
+	//ret |= gpio_request(MX6SL_BRD_EPDC_GDRL, "epdc_gdrl");
 	ret |= gpio_request(MX6SL_BRD_EPDC_SDCLK, "epdc_sdclk");
 	ret |= gpio_request(MX6SL_BRD_EPDC_SDOE, "epdc_sdoe");
 	ret |= gpio_request(MX6SL_BRD_EPDC_SDLE, "epdc_sdle");
-	ret |= gpio_request(MX6SL_BRD_EPDC_SDSHR, "epdc_sdshr");
-	ret |= gpio_request(MX6SL_BRD_EPDC_BDR0, "epdc_bdr0");
+	//ret |= gpio_request(MX6SL_BRD_EPDC_SDSHR, "epdc_sdshr");
+	//ret |= gpio_request(MX6SL_BRD_EPDC_BDR0, "epdc_bdr0");
 	ret |= gpio_request(MX6SL_BRD_EPDC_SDCE0, "epdc_sdce0");
-	ret |= gpio_request(MX6SL_BRD_EPDC_SDCE1, "epdc_sdce1");
-	ret |= gpio_request(MX6SL_BRD_EPDC_SDCE2, "epdc_sdce2");
+	//ret |= gpio_request(MX6SL_BRD_EPDC_SDCE1, "epdc_sdce1");
+	//ret |= gpio_request(MX6SL_BRD_EPDC_SDCE2, "epdc_sdce2");
 
 	return ret;
 }
@@ -916,16 +918,16 @@ static void epdc_put_pins(void)
 	gpio_free(MX6SL_BRD_EPDC_SDDO_7);
 	gpio_free(MX6SL_BRD_EPDC_GDCLK);
 	gpio_free(MX6SL_BRD_EPDC_GDSP);
-	gpio_free(MX6SL_BRD_EPDC_GDOE);
-	gpio_free(MX6SL_BRD_EPDC_GDRL);
+	//gpio_free(MX6SL_BRD_EPDC_GDOE);
+	//gpio_free(MX6SL_BRD_EPDC_GDRL);
 	gpio_free(MX6SL_BRD_EPDC_SDCLK);
 	gpio_free(MX6SL_BRD_EPDC_SDOE);
 	gpio_free(MX6SL_BRD_EPDC_SDLE);
-	gpio_free(MX6SL_BRD_EPDC_SDSHR);
-	gpio_free(MX6SL_BRD_EPDC_BDR0);
+	//gpio_free(MX6SL_BRD_EPDC_SDSHR);
+	//gpio_free(MX6SL_BRD_EPDC_BDR0);
 	gpio_free(MX6SL_BRD_EPDC_SDCE0);
-	gpio_free(MX6SL_BRD_EPDC_SDCE1);
-	gpio_free(MX6SL_BRD_EPDC_SDCE2);
+	//gpio_free(MX6SL_BRD_EPDC_SDCE1);
+	//gpio_free(MX6SL_BRD_EPDC_SDCE2);
 }
 
 static void epdc_enable_pins(void)
@@ -944,16 +946,16 @@ static void epdc_enable_pins(void)
 	gpio_direction_input(MX6SL_BRD_EPDC_SDDO_7);
 	gpio_direction_input(MX6SL_BRD_EPDC_GDCLK);
 	gpio_direction_input(MX6SL_BRD_EPDC_GDSP);
-	gpio_direction_input(MX6SL_BRD_EPDC_GDOE);
-	gpio_direction_input(MX6SL_BRD_EPDC_GDRL);
+	//gpio_direction_input(MX6SL_BRD_EPDC_GDOE);
+	//gpio_direction_input(MX6SL_BRD_EPDC_GDRL);
 	gpio_direction_input(MX6SL_BRD_EPDC_SDCLK);
 	gpio_direction_input(MX6SL_BRD_EPDC_SDOE);
 	gpio_direction_input(MX6SL_BRD_EPDC_SDLE);
-	gpio_direction_input(MX6SL_BRD_EPDC_SDSHR);
-	gpio_direction_input(MX6SL_BRD_EPDC_BDR0);
+	//gpio_direction_input(MX6SL_BRD_EPDC_SDSHR);
+	//gpio_direction_input(MX6SL_BRD_EPDC_BDR0);
 	gpio_direction_input(MX6SL_BRD_EPDC_SDCE0);
-	gpio_direction_input(MX6SL_BRD_EPDC_SDCE1);
-	gpio_direction_input(MX6SL_BRD_EPDC_SDCE2);
+	//gpio_direction_input(MX6SL_BRD_EPDC_SDCE1);
+	//gpio_direction_input(MX6SL_BRD_EPDC_SDCE2);
 }
 
 static void epdc_disable_pins(void)
@@ -973,18 +975,34 @@ static void epdc_disable_pins(void)
 	gpio_direction_output(MX6SL_BRD_EPDC_SDDO_7, 0);
 	gpio_direction_output(MX6SL_BRD_EPDC_GDCLK, 0);
 	gpio_direction_output(MX6SL_BRD_EPDC_GDSP, 0);
-	gpio_direction_output(MX6SL_BRD_EPDC_GDOE, 0);
-	gpio_direction_output(MX6SL_BRD_EPDC_GDRL, 0);
+	//gpio_direction_output(MX6SL_BRD_EPDC_GDOE, 0);
+	//gpio_direction_output(MX6SL_BRD_EPDC_GDRL, 0);
 	gpio_direction_output(MX6SL_BRD_EPDC_SDCLK, 0);
 	gpio_direction_output(MX6SL_BRD_EPDC_SDOE, 0);
 	gpio_direction_output(MX6SL_BRD_EPDC_SDLE, 0);
-	gpio_direction_output(MX6SL_BRD_EPDC_SDSHR, 0);
-	gpio_direction_output(MX6SL_BRD_EPDC_BDR0, 0);
+	//gpio_direction_output(MX6SL_BRD_EPDC_SDSHR, 0);
+	//gpio_direction_output(MX6SL_BRD_EPDC_BDR0, 0);
 	gpio_direction_output(MX6SL_BRD_EPDC_SDCE0, 0);
-	gpio_direction_output(MX6SL_BRD_EPDC_SDCE1, 0);
-	gpio_direction_output(MX6SL_BRD_EPDC_SDCE2, 0);
+	//gpio_direction_output(MX6SL_BRD_EPDC_SDCE1, 0);
+	//gpio_direction_output(MX6SL_BRD_EPDC_SDCE2, 0);
 }
 
+static struct fb_videomode e060scm_mode = {
+        .name = "E060SCM",
+        .refresh = 85,
+        .xres = 960,
+        .yres = 540,
+        .pixclock = 25000000,
+        .left_margin = 8,
+        .right_margin = 32,
+        .upper_margin = 4,
+        .lower_margin = 9,
+        .hsync_len = 10,
+        .vsync_len = 2,
+        .sync = 0,
+        .vmode = FB_VMODE_NONINTERLACED,
+        .flag = 0,
+};
 static struct fb_videomode e60_v110_mode = {
 	.name = "E60_V110",
 	.refresh = 50,
@@ -1020,6 +1038,7 @@ static struct fb_videomode e60_v220_mode = {
 	.xres = 800,
 	.yres = 600,
 };
+/*
 static struct fb_videomode e060scm_mode = {
 	.name = "E060SCM",
 	.refresh = 85,
@@ -1036,6 +1055,7 @@ static struct fb_videomode e060scm_mode = {
 	.vmode = FB_VMODE_NONINTERLACED,
 	.flag = 0,
 };
+*/
 static struct fb_videomode e97_v110_mode = {
 	.name = "E97_V110",
 	.refresh = 50,
@@ -1054,6 +1074,19 @@ static struct fb_videomode e97_v110_mode = {
 };
 
 static struct imx_epdc_fb_mode panel_modes[] = {
+	{
+                &e060scm_mode,
+                4,      /* vscan_holdoff */
+                10,     /* sdoed_width */
+                20,     /* sdoed_delay */
+                10,     /* sdoez_width */
+                20,     /* sdoez_delay */
+                436,    /* gdclk_hp_offs */
+                342,     /* gdsp_offs */
+                0,      /* gdoe_offs */
+                75,      /* gdclk_offs */
+                1,      /* num_ce */
+        },
 	{
 		&e60_v110_mode,
 		4,      /* vscan_holdoff */
@@ -1080,19 +1113,19 @@ static struct imx_epdc_fb_mode panel_modes[] = {
 		9,      /* gdclk_offs */
 		1,      /* num_ce */
 	},
-	{
-		&e060scm_mode,
-		4,      /* vscan_holdoff */
-		10,     /* sdoed_width */
-		20,     /* sdoed_delay */
-		10,     /* sdoez_width */
-		20,     /* sdoez_delay */
-		419,    /* gdclk_hp_offs */
-		20,     /* gdsp_offs */
-		0,      /* gdoe_offs */
-		5,      /* gdclk_offs */
-		1,      /* num_ce */
-	},
+//	{
+//		&e060scm_mode,
+//		4,      /* vscan_holdoff */
+//		10,     /* sdoed_width */
+//		20,     /* sdoed_delay */
+//		10,     /* sdoez_width */
+//		20,     /* sdoez_delay */
+//		419,    /* gdclk_hp_offs */
+//		20,     /* gdsp_offs */
+//		0,      /* gdoe_offs */
+//		5,      /* gdclk_offs */
+//		1,      /* num_ce */
+//	},
 	{
 		&e97_v110_mode,
 		8,      /* vscan_holdoff */
@@ -1440,7 +1473,17 @@ static void __init elan_ts_init(void)
 	gpio_direction_output(MX6SL_BRD_ELAN_RST, 1);
 	gpio_direction_output(MX6SL_BRD_ELAN_CE, 1);
 }
+static void __init ft5x0x_ts_init(void)
+{
+	mxc_iomux_v3_setup_multiple_pads(mx6sl_brd_focaltech_pads,
+					ARRAY_SIZE(mx6sl_brd_focaltech_pads));
 
+	gpio_request(MX6SL_BRD_ELAN_INT, "ft5x0x-interrupt");
+	gpio_direction_input(MX6SL_BRD_CTP_INT);
+
+	gpio_request(MX6SL_BRD_ELAN_RST, "ft5x0x-reset");
+	gpio_direction_output(MX6SL_BRD_CTP_RST, 1);
+}
 /*
  *Usually UOK and DOK should have separate
  *line to differentiate its behaviour (with different
@@ -1580,7 +1623,7 @@ static void __init mx6_evk_init(void)
 	mxc_iomux_v3_setup_multiple_pads(mx6sl_brd_pads,
 					ARRAY_SIZE(mx6sl_brd_pads));
 
-	elan_ts_init();
+	ft5x0x_ts_init();
 
 	gp_reg_id = mx6sl_evk_dvfscore_data.reg_id;
 	soc_reg_id = mx6sl_evk_dvfscore_data.soc_id;
@@ -1627,7 +1670,7 @@ static void __init mx6_evk_init(void)
 	mxc_iomux_set_gpr_register(1, 14, 1, 0);
 	mxc_iomux_set_gpr_register(1, 17, 2, 0);
 
-	imx6_init_fec(fec_data);
+	//imx6_init_fec(fec_data);
 
 	platform_device_register(&evk_vmmc_reg_devices);
 	imx6q_add_sdhci_usdhc_imx(1, &mx6_evk_sd2_data);
@@ -1680,7 +1723,7 @@ static void __init mx6_evk_init(void)
 	imx6q_add_imx2_wdt(0, NULL);
 
 	imx_add_viv_gpu(&imx6_gpu_data, &imx6q_gpu_pdata);
-	imx6sl_add_imx_keypad(&mx6sl_evk_map_data);
+	//imx6sl_add_imx_keypad(&mx6sl_evk_map_data);
 	imx6q_add_busfreq();
 	imx6sl_add_dcp();
 	imx6sl_add_rngb();

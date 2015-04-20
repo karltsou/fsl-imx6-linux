@@ -239,6 +239,10 @@ extern const struct imx_epdc_data imx6dl_epdc_data __initconst;
 #define imx6dl_add_imx_epdc(pdata)	\
 	imx_add_imx_epdc(&imx6dl_epdc_data, pdata)
 
+extern const struct imx_epdc_data imx6sl_epdc_data __initconst;
+#define imx6sl_add_imx_epdc(pdata)      \
+        imx_add_imx_epdc(&imx6dl_epdc_data, pdata)
+
 extern const struct imx_epdc_data imx6sl_spdc_data __initconst;
 #define imx6sl_add_imx_spdc(pdata)	\
 	imx_add_imx_spdc(&imx6sl_spdc_data, pdata)
