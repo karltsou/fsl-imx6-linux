@@ -91,7 +91,7 @@ extern int __init mx6sl_evk_init_pfuze100(u32 int_gpio);
 
 static int csi_enabled;
 
-#define SXSDMAN_BLUETOOTH_ENABLE
+#undef SXSDMAN_BLUETOOTH_ENABLE
 
 static struct ion_platform_data imx_ion_data = {
 	.nr = 1,
@@ -140,12 +140,19 @@ static iomux_v3_cfg_t mx6sl_uart4_pads[] = {
 #else
 /* uart2 pins */
 static iomux_v3_cfg_t mx6sl_uart2_pads[] = {
-	MX6SL_PAD_SD2_DAT5__UART2_TXD,
-	MX6SL_PAD_SD2_DAT4__UART2_RXD,
-	MX6SL_PAD_SD2_DAT6__UART2_RTS,
-	MX6SL_PAD_SD2_DAT7__UART2_CTS,
+	MX6SL_PAD_EPDC_D13__UART2_TXD,
+	MX6SL_PAD_EPDC_D12__UART2_RXD,
+	MX6SL_PAD_EPDC_D14__UART2_RTS,
+	MX6SL_PAD_EPDC_D15__UART2_CTS,
 };
 #endif
+/* uart5 pins */
+static iomux_v3_cfg_t mx6sl_uart5_pads[] = {
+	MX6SL_PAD_ECSPI1_MOSI__UART5_TXD,
+	MX6SL_PAD_ECSPI1_SCLK__UART5_RXD,
+	/* MX6SL_PAD_ECSPI1_MISO__UART5_RTS, */
+	/* MX6SL_PAD_ECSPI1_SS0__UART5_CTS, */
+};
 
 enum sd_pad_mode {
 	SD_PAD_MODE_LOW_SPEED,
@@ -432,22 +439,6 @@ static int __init max17135_regulator_init(struct max17135 *max17135)
 	max17135->gpio_pmic_wakeup = pdata->gpio_pmic_wakeup;
 	max17135->gpio_pmic_v3p3 = pdata->gpio_pmic_v3p3;
 	max17135->gpio_pmic_intr = pdata->gpio_pmic_intr;
-/*
-	gpio_request(max17135->gpio_pmic_wakeup, "epdc-pmic-wake");
-	gpio_direction_output(max17135->gpio_pmic_wakeup, 0);
-
-	gpio_request(max17135->gpio_pmic_vcom_ctrl, "epdc-vcom");
-	gpio_direction_output(max17135->gpio_pmic_vcom_ctrl, 0);
-
-	gpio_request(max17135->gpio_pmic_v3p3, "epdc-v3p3");
-	gpio_direction_output(max17135->gpio_pmic_v3p3, 0);
-
-	gpio_request(max17135->gpio_pmic_intr, "epdc-pmic-int");
-	gpio_direction_input(max17135->gpio_pmic_intr);
-
-	gpio_request(max17135->gpio_pmic_pwrgood, "epdc-pwrstat");
-	gpio_direction_input(max17135->gpio_pmic_pwrgood);
-*/
 	max17135->vcom_setup = false;
 	max17135->init_done = false;
 
@@ -841,12 +832,17 @@ static const struct imxuart_platform_data mx6sl_evk_uart4_data __initconst = {
 	.dma_req_tx = MX6Q_DMA_REQ_UART4_TX,
 };
 #else
-static const struct imxuart_platform_data mx6sl_evk_uart1_data __initconst = {
+static const struct imxuart_platform_data mx6sl_evk_uart2_data __initconst = {
 	.flags      = IMXUART_HAVE_RTSCTS | IMXUART_SDMA,
 	.dma_req_rx = MX6Q_DMA_REQ_UART2_RX,
 	.dma_req_tx = MX6Q_DMA_REQ_UART2_TX,
 };
 #endif
+static const struct imxuart_platform_data mx6sl_evk_uart5_data __initconst = {
+        .flags      = IMXUART_SDMA,
+        .dma_req_rx = MX6Q_DMA_REQ_UART5_RX,
+        .dma_req_tx = MX6Q_DMA_REQ_UART5_TX,
+};
 
 static inline void mx6_evk_init_uart(void)
 {
@@ -892,16 +888,10 @@ static int epdc_get_pins(void)
 	ret |= gpio_request(MX6SL_BRD_EPDC_SDDO_7, "epdc_d7");
 	ret |= gpio_request(MX6SL_BRD_EPDC_GDCLK, "epdc_gdclk");
 	ret |= gpio_request(MX6SL_BRD_EPDC_GDSP, "epdc_gdsp");
-	//ret |= gpio_request(MX6SL_BRD_EPDC_GDOE, "epdc_gdoe");
-	//ret |= gpio_request(MX6SL_BRD_EPDC_GDRL, "epdc_gdrl");
 	ret |= gpio_request(MX6SL_BRD_EPDC_SDCLK, "epdc_sdclk");
 	ret |= gpio_request(MX6SL_BRD_EPDC_SDOE, "epdc_sdoe");
 	ret |= gpio_request(MX6SL_BRD_EPDC_SDLE, "epdc_sdle");
-	//ret |= gpio_request(MX6SL_BRD_EPDC_SDSHR, "epdc_sdshr");
-	//ret |= gpio_request(MX6SL_BRD_EPDC_BDR0, "epdc_bdr0");
 	ret |= gpio_request(MX6SL_BRD_EPDC_SDCE0, "epdc_sdce0");
-	//ret |= gpio_request(MX6SL_BRD_EPDC_SDCE1, "epdc_sdce1");
-	//ret |= gpio_request(MX6SL_BRD_EPDC_SDCE2, "epdc_sdce2");
 
 	return ret;
 }
@@ -918,16 +908,10 @@ static void epdc_put_pins(void)
 	gpio_free(MX6SL_BRD_EPDC_SDDO_7);
 	gpio_free(MX6SL_BRD_EPDC_GDCLK);
 	gpio_free(MX6SL_BRD_EPDC_GDSP);
-	//gpio_free(MX6SL_BRD_EPDC_GDOE);
-	//gpio_free(MX6SL_BRD_EPDC_GDRL);
 	gpio_free(MX6SL_BRD_EPDC_SDCLK);
 	gpio_free(MX6SL_BRD_EPDC_SDOE);
 	gpio_free(MX6SL_BRD_EPDC_SDLE);
-	//gpio_free(MX6SL_BRD_EPDC_SDSHR);
-	//gpio_free(MX6SL_BRD_EPDC_BDR0);
 	gpio_free(MX6SL_BRD_EPDC_SDCE0);
-	//gpio_free(MX6SL_BRD_EPDC_SDCE1);
-	//gpio_free(MX6SL_BRD_EPDC_SDCE2);
 }
 
 static void epdc_enable_pins(void)
@@ -946,16 +930,10 @@ static void epdc_enable_pins(void)
 	gpio_direction_input(MX6SL_BRD_EPDC_SDDO_7);
 	gpio_direction_input(MX6SL_BRD_EPDC_GDCLK);
 	gpio_direction_input(MX6SL_BRD_EPDC_GDSP);
-	//gpio_direction_input(MX6SL_BRD_EPDC_GDOE);
-	//gpio_direction_input(MX6SL_BRD_EPDC_GDRL);
 	gpio_direction_input(MX6SL_BRD_EPDC_SDCLK);
 	gpio_direction_input(MX6SL_BRD_EPDC_SDOE);
 	gpio_direction_input(MX6SL_BRD_EPDC_SDLE);
-	//gpio_direction_input(MX6SL_BRD_EPDC_SDSHR);
-	//gpio_direction_input(MX6SL_BRD_EPDC_BDR0);
 	gpio_direction_input(MX6SL_BRD_EPDC_SDCE0);
-	//gpio_direction_input(MX6SL_BRD_EPDC_SDCE1);
-	//gpio_direction_input(MX6SL_BRD_EPDC_SDCE2);
 }
 
 static void epdc_disable_pins(void)
@@ -975,16 +953,10 @@ static void epdc_disable_pins(void)
 	gpio_direction_output(MX6SL_BRD_EPDC_SDDO_7, 0);
 	gpio_direction_output(MX6SL_BRD_EPDC_GDCLK, 0);
 	gpio_direction_output(MX6SL_BRD_EPDC_GDSP, 0);
-	//gpio_direction_output(MX6SL_BRD_EPDC_GDOE, 0);
-	//gpio_direction_output(MX6SL_BRD_EPDC_GDRL, 0);
 	gpio_direction_output(MX6SL_BRD_EPDC_SDCLK, 0);
 	gpio_direction_output(MX6SL_BRD_EPDC_SDOE, 0);
 	gpio_direction_output(MX6SL_BRD_EPDC_SDLE, 0);
-	//gpio_direction_output(MX6SL_BRD_EPDC_SDSHR, 0);
-	//gpio_direction_output(MX6SL_BRD_EPDC_BDR0, 0);
 	gpio_direction_output(MX6SL_BRD_EPDC_SDCE0, 0);
-	//gpio_direction_output(MX6SL_BRD_EPDC_SDCE1, 0);
-	//gpio_direction_output(MX6SL_BRD_EPDC_SDCE2, 0);
 }
 
 static struct fb_videomode e060scm_mode = {
@@ -1113,19 +1085,6 @@ static struct imx_epdc_fb_mode panel_modes[] = {
 		9,      /* gdclk_offs */
 		1,      /* num_ce */
 	},
-//	{
-//		&e060scm_mode,
-//		4,      /* vscan_holdoff */
-//		10,     /* sdoed_width */
-//		20,     /* sdoed_delay */
-//		10,     /* sdoez_width */
-//		20,     /* sdoez_delay */
-//		419,    /* gdclk_hp_offs */
-//		20,     /* gdsp_offs */
-//		0,      /* gdoe_offs */
-//		5,      /* gdclk_offs */
-//		1,      /* num_ce */
-//	},
 	{
 		&e97_v110_mode,
 		8,      /* vscan_holdoff */
@@ -1555,9 +1514,15 @@ static void __init uart2_init(void)
 {
 	mxc_iomux_v3_setup_multiple_pads(mx6sl_uart2_pads,
 					ARRAY_SIZE(mx6sl_uart2_pads));
-	imx6sl_add_imx_uart(1, &mx6sl_evk_uart1_data);
+	imx6sl_add_imx_uart(1, &mx6sl_evk_uart2_data);
 }
 #endif
+static void __init uart5_init(void)
+{
+        mxc_iomux_v3_setup_multiple_pads(mx6sl_uart5_pads,
+                                        ARRAY_SIZE(mx6sl_uart5_pads));
+        imx6sl_add_imx_uart(2, &mx6sl_evk_uart5_data);
+}
 
 static void mx6sl_evk_bt_reset(void)
 {
@@ -1656,8 +1621,8 @@ static void __init mx6_evk_init(void)
 	}
 
 	/* SPI */
-	imx6q_add_ecspi(0, &mx6_evk_spi_data);
-	spi_device_init();
+	//imx6q_add_ecspi(0, &mx6_evk_spi_data);
+	//spi_device_init();
 
 	mx6sl_evk_init_pfuze100(0);
 
@@ -1708,16 +1673,17 @@ static void __init mx6_evk_init(void)
 
 	imx6q_init_audio();
 
-	/* uart2 for bluetooth */
 #ifdef SXSDMAN_BLUETOOTH_ENABLE
 	if (uart4_enabled)
 		uart4_init();
 #else
-	if (uart2_enabled)
-		uart2_init();
+	/* uart2 for bluetooth */
+	uart2_init();
 #endif
-
 	mxc_register_device(&mxc_bt_rfkill, &mxc_bt_rfkill_data);
+
+	/* uart5 for zigbee */
+	uart5_init();
 
 	imx6q_add_viim();
 	imx6q_add_imx2_wdt(0, NULL);
