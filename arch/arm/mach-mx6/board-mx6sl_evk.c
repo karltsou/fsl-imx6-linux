@@ -244,33 +244,38 @@ static int plt_sd_pad_change(unsigned int index, int clock)
 }
 
 static const struct esdhc_platform_data mx6_evk_sd1_data __initconst = {
-	.cd_gpio		= MX6_BRD_SD1_CD,
-	.wp_gpio		= MX6_BRD_SD1_WP,
-	.support_8bit		= 1,
-	.support_18v		= 1,
-	.keep_power_at_suspend	= 1,
+	.always_present         = 1,
+	.cd_gpio		= -1,
+	.wp_gpio		= -1,
+	.support_8bit		= 0,
+	.support_18v		= 0,
+	.keep_power_at_suspend	= 0,
 	.delay_line		= 0,
 	.platform_pad_change = plt_sd_pad_change,
 };
 
 static const struct esdhc_platform_data mx6_evk_sd2_data __initconst = {
-	.always_present = 1,
-	.cd_gpio		= MX6_BRD_SD2_CD,
-	.wp_gpio		= MX6_BRD_SD2_WP,
+	.always_present         = 1,
+	.cd_gpio		= -1,
+	.wp_gpio		= -1,
+	.support_8bit           = 1,
 	.keep_power_at_suspend	= 1,
 	.delay_line		= 0,
-	.support_18v		= 1,
+	.support_18v		= 0,
 	.platform_pad_change = plt_sd_pad_change,
 	.cd_type = ESDHC_CD_PERMANENT,
 };
 
 static const struct esdhc_platform_data mx6_evk_sd3_data __initconst = {
-	.cd_gpio		= MX6_BRD_SD3_CD,
+	.always_present         = 1,
+	.cd_gpio		= -1,
 	.wp_gpio		= -1,
+	.support_8bit           = 0,
 	.keep_power_at_suspend	= 1,
 	.delay_line		= 0,
 	.support_18v		= 1,
 	.platform_pad_change = plt_sd_pad_change,
+	.cd_type = ESDHC_CD_PERMANENT,
 };
 
 #define mV_to_uV(mV) (mV * 1000)
@@ -1010,24 +1015,7 @@ static struct fb_videomode e60_v220_mode = {
 	.xres = 800,
 	.yres = 600,
 };
-/*
-static struct fb_videomode e060scm_mode = {
-	.name = "E060SCM",
-	.refresh = 85,
-	.xres = 800,
-	.yres = 600,
-	.pixclock = 26666667,
-	.left_margin = 8,
-	.right_margin = 100,
-	.upper_margin = 4,
-	.lower_margin = 8,
-	.hsync_len = 4,
-	.vsync_len = 1,
-	.sync = 0,
-	.vmode = FB_VMODE_NONINTERLACED,
-	.flag = 0,
-};
-*/
+
 static struct fb_videomode e97_v110_mode = {
 	.name = "E97_V110",
 	.refresh = 50,
@@ -1638,8 +1626,8 @@ static void __init mx6_evk_init(void)
 	//imx6_init_fec(fec_data);
 
 	platform_device_register(&evk_vmmc_reg_devices);
-	imx6q_add_sdhci_usdhc_imx(1, &mx6_evk_sd2_data);
 	imx6q_add_sdhci_usdhc_imx(0, &mx6_evk_sd1_data);
+	imx6q_add_sdhci_usdhc_imx(1, &mx6_evk_sd2_data);
 	imx6q_add_sdhci_usdhc_imx(2, &mx6_evk_sd3_data);
 
 	mx6_evk_init_usb();
