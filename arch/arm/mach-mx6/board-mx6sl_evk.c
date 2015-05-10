@@ -771,23 +771,11 @@ static struct i2c_board_info mxc_i2c0_board_info[] __initdata = {
 	{
 		I2C_BOARD_INFO("max17135", 0x48),
 		.platform_data = &max17135_pdata,
-	}, {
-		I2C_BOARD_INFO("elan-touch", 0x10),
-		.irq = gpio_to_irq(MX6SL_BRD_ELAN_INT),
-	}, {
-		I2C_BOARD_INFO("mma8450", 0x1c),
 	},
 };
 
 static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
 	{
-		I2C_BOARD_INFO("wm8962", 0x1a),
-		.platform_data = &wm8962_config_data,
-	}, {
-		I2C_BOARD_INFO("sii902x", 0),
-		.platform_data = &sii902x_hdmi_data,
-		.irq = gpio_to_irq(MX6SL_BRD_EPDC_PWRCTRL3)
-	}, {
 		I2C_BOARD_INFO("ft5x0x_ts", 0x38),
                 .irq = gpio_to_irq(MX6SL_BRD_CTP_INT),
 	},
@@ -795,8 +783,11 @@ static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
 
 static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
 	{
-		I2C_BOARD_INFO("ov5640", 0x3c),
-		.platform_data = (void *)&camera_data,
+		I2C_BOARD_INFO("mma8x5x", 0x1c),
+	},
+	{
+		I2C_BOARD_INFO("wm8962", 0x1a),
+		.platform_data = &wm8962_config_data,
 	},
 };
 
@@ -1585,28 +1576,16 @@ static void __init mx6_evk_init(void)
 
 	imx6q_add_imx_i2c(0, &mx6_evk_i2c0_data);
 	imx6q_add_imx_i2c(1, &mx6_evk_i2c1_data);
+	imx6q_add_imx_i2c(2, &mx6_evk_i2c2_data);
+
 	i2c_register_board_info(0, mxc_i2c0_board_info,
 			ARRAY_SIZE(mxc_i2c0_board_info));
 
-	/*  setting sii902x address when hdmi enabled */
-	if (hdmi_enabled) {
-		for (i = 0; i < ARRAY_SIZE(mxc_i2c1_board_info); i++) {
-			if (!strcmp(mxc_i2c1_board_info[i].type, "sii902x")) {
-				mxc_i2c1_board_info[i].addr = 0x39;
-				break;
-			}
-		}
-	}
-
 	i2c_register_board_info(1, mxc_i2c1_board_info,
 			ARRAY_SIZE(mxc_i2c1_board_info));
-	/* only camera on I2C3, that's why we can do so */
-	if (csi_enabled == 1) {
-		mxc_register_device(&csi_v4l2_devices, NULL);
-		imx6q_add_imx_i2c(2, &mx6_evk_i2c2_data);
-		i2c_register_board_info(2, mxc_i2c2_board_info,
-				ARRAY_SIZE(mxc_i2c2_board_info));
-	}
+
+	i2c_register_board_info(2, mxc_i2c2_board_info,
+                                ARRAY_SIZE(mxc_i2c2_board_info));
 
 	/* SPI */
 	//imx6q_add_ecspi(0, &mx6_evk_spi_data);
