@@ -755,6 +755,14 @@ static struct fsl_mxc_camera_platform_data camera_data = {
 	.analog_regulator = "VGEN6_2V8",
 };
 
+struct mma8x5x_data {
+        int position;
+};
+
+static struct mma8x5x_data gsensor_data = {
+	.position = 0,
+};
+
 static struct imxi2c_platform_data mx6_evk_i2c0_data = {
 	.bitrate = 400000,
 };
@@ -784,6 +792,8 @@ static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
 static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
 	{
 		I2C_BOARD_INFO("mma8x5x", 0x1c),
+		.irq = gpio_to_irq(MX6SL_BRD_GSENSOR_INT),
+		.platform_data = &gsensor_data,
 	},
 	{
 		I2C_BOARD_INFO("wm8962", 0x1a),
@@ -1416,12 +1426,20 @@ static void __init ft5x0x_ts_init(void)
 	mxc_iomux_v3_setup_multiple_pads(mx6sl_brd_focaltech_pads,
 					ARRAY_SIZE(mx6sl_brd_focaltech_pads));
 
-	gpio_request(MX6SL_BRD_ELAN_INT, "ft5x0x-interrupt");
+	gpio_request(MX6SL_BRD_CTP_INT, "ft5x0x-interrupt");
 	gpio_direction_input(MX6SL_BRD_CTP_INT);
-
-	gpio_request(MX6SL_BRD_ELAN_RST, "ft5x0x-reset");
+	gpio_request(MX6SL_BRD_CTP_RST, "ft5x0x-reset");
 	gpio_direction_output(MX6SL_BRD_CTP_RST, 1);
 }
+static void __init mma8x5x_gsensor_init(void)
+{
+	mxc_iomux_v3_setup_multiple_pads(mx6sl_brd_mma8x5x_pads,
+					ARRAY_SIZE(mx6sl_brd_mma8x5x_pads));
+
+	gpio_request(MX6SL_BRD_GSENSOR_INT, "mma8x5x-interrupt");
+	gpio_direction_input(MX6SL_BRD_GSENSOR_INT);
+}
+
 /*
  *Usually UOK and DOK should have separate
  *line to differentiate its behaviour (with different
@@ -1568,6 +1586,7 @@ static void __init mx6_evk_init(void)
 					ARRAY_SIZE(mx6sl_brd_pads));
 
 	ft5x0x_ts_init();
+	mma8x5x_gsensor_init();
 
 	gp_reg_id = mx6sl_evk_dvfscore_data.reg_id;
 	soc_reg_id = mx6sl_evk_dvfscore_data.soc_id;
@@ -1585,7 +1604,7 @@ static void __init mx6_evk_init(void)
 			ARRAY_SIZE(mxc_i2c1_board_info));
 
 	i2c_register_board_info(2, mxc_i2c2_board_info,
-                                ARRAY_SIZE(mxc_i2c2_board_info));
+			ARRAY_SIZE(mxc_i2c2_board_info));
 
 	/* SPI */
 	//imx6q_add_ecspi(0, &mx6_evk_spi_data);

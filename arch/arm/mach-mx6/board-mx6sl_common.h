@@ -90,6 +90,8 @@
 /* FocalTech TS */
 #define MX6SL_BRD_CTP_INT		IMX_GPIO_NR(2, 10)
 #define MX6SL_BRD_CTP_RST		IMX_GPIO_NR(4, 4)
+/* Freeescale MMA8x5x GSENSOR */
+#define MX6SL_BRD_GSENSOR_INT		IMX_GPIO_NR(4, 5)
 
 static iomux_v3_cfg_t mx6sl_brd_pads[] = {
 
@@ -175,6 +177,8 @@ static iomux_v3_cfg_t mx6sl_brd_pads[] = {
 	MX6SL_PAD_I2C1_SDA__I2C1_SDA,
 	MX6SL_PAD_I2C2_SCL__I2C2_SCL,
 	MX6SL_PAD_I2C2_SDA__I2C2_SDA,
+	MX6SL_PAD_AUD_RXC__I2C3_SDA,
+	MX6SL_PAD_AUD_RXFS__I2C3_SCL,
 
 	/* ECSPI1 */
 	MX6SL_PAD_ECSPI1_MISO__ECSPI1_MISO,
@@ -402,6 +406,9 @@ static iomux_v3_cfg_t mx6sl_brd_elan_pads[] = {
 static iomux_v3_cfg_t mx6sl_brd_focaltech_pads[] = {
 	MX6SL_PAD_EPDC_PWRCTRL3__GPIO_2_10,	/* INT */
 	MX6SL_PAD_KEY_COL6__GPIO_4_4,		/* RST */
+};
+static iomux_v3_cfg_t mx6sl_brd_mma8x5x_pads[] = {
+	MX6SL_PAD_KEY_ROW6__GPIO_4_5,		/* INT */
 };
 static iomux_v3_cfg_t suspend_enter_pads[] = {
 	/* Audio pads. */
