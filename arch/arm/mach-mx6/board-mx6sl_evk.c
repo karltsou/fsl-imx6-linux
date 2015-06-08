@@ -1448,10 +1448,12 @@ static void __init bcm43xx_init(void)
 
 	gpio_request(MX6SL_BRD_BT_REG_ON, "bcm43xx-bt-reg-on");
 	gpio_direction_output(MX6SL_BRD_BT_REG_ON, 0);
-	gpio_request(MX6SL_BRD_WIFI_D_WAKE, "bcm43xx-bt-d-wake");
+	gpio_request(MX6SL_BRD_BT_D_WAKE, "bcm43xx-bt-d-wake");
 	gpio_direction_output(MX6SL_BRD_BT_D_WAKE, 0);
-	gpio_request(MX6SL_BRD_WIFI_H_WAKE, "bcm43xx-bt-h-wake");
+	gpio_request(MX6SL_BRD_BT_H_WAKE, "bcm43xx-bt-h-wake");
 	gpio_direction_input(MX6SL_BRD_BT_H_WAKE);
+	gpio_request(MX6SL_BRD_WIFI_D_WAKE, "bcm43xx-wifi-d-wake");
+	gpio_direction_output(MX6SL_BRD_WIFI_D_WAKE, 1);
 	gpio_request(MX6SL_BRD_WIFI_H_WAKE, "bcm43xx-wifi-h-wake");
 	gpio_direction_input(MX6SL_BRD_WIFI_H_WAKE);
 	// platform driver registration

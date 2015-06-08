@@ -188,17 +188,14 @@ int bcm_wifi_set_power(int enable)
 {
 	int ret = 0;
 
-	gpio_request(MX6SL_BRD_WIFI_D_WAKE, "bcm43xx-wifi-d-wake");
 	gpio_request(MX6SL_BRD_WIFI_REG_ON, "bcm43xx-wifi-reg-on");
 	if (enable) {
-		gpio_direction_output(MX6SL_BRD_WIFI_D_WAKE, 1);
 		gpio_direction_output(MX6SL_BRD_WIFI_REG_ON, 1);
 		/* WLAN chip to reset */
                 mdelay(150);
                 printk("%s: wifi power successed to pull up\n", __func__);
 	}
 	else {
-		gpio_direction_output(MX6SL_BRD_WIFI_D_WAKE, 0);
 		gpio_direction_output(MX6SL_BRD_WIFI_REG_ON, 0);
 		/* WLAN chip down */
                 mdelay(100);
