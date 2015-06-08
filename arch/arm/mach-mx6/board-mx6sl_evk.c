@@ -76,7 +76,7 @@
 #include "cpu_op-mx6.h"
 #include "board-mx6sl_common.h"
 
-
+extern void init_bcm_wifi(void);
 static int spdc_sel;
 static int max17135_regulator_init(struct max17135 *max17135);
 static void mx6sl_evk_suspend_enter(void);
@@ -273,9 +273,10 @@ static const struct esdhc_platform_data mx6_evk_sd3_data __initconst = {
 	.support_8bit           = 0,
 	.keep_power_at_suspend	= 1,
 	.delay_line		= 0,
-	.support_18v		= 1,
+	.support_18v		= 0,
 	.platform_pad_change = plt_sd_pad_change,
-	.cd_type = ESDHC_CD_PERMANENT,
+	.cd_type = ESDHC_CD_CONTROLLER,
+	.keep_clock		= 1,
 };
 
 #define mV_to_uV(mV) (mV * 1000)
@@ -1439,7 +1440,23 @@ static void __init mma8x5x_gsensor_init(void)
 	gpio_request(MX6SL_BRD_GSENSOR_INT, "mma8x5x-interrupt");
 	gpio_direction_input(MX6SL_BRD_GSENSOR_INT);
 }
+/* BCM43xx Wifi Bluetooth */
+static void __init bcm43xx_init(void)
+{
+	mxc_iomux_v3_setup_multiple_pads(mx6sl_brd_bcm43xx_pads,
+					ARRAY_SIZE(mx6sl_brd_bcm43xx_pads));
 
+	gpio_request(MX6SL_BRD_BT_REG_ON, "bcm43xx-bt-reg-on");
+	gpio_direction_output(MX6SL_BRD_BT_REG_ON, 0);
+	gpio_request(MX6SL_BRD_WIFI_D_WAKE, "bcm43xx-bt-d-wake");
+	gpio_direction_output(MX6SL_BRD_BT_D_WAKE, 0);
+	gpio_request(MX6SL_BRD_WIFI_H_WAKE, "bcm43xx-bt-h-wake");
+	gpio_direction_input(MX6SL_BRD_BT_H_WAKE);
+	gpio_request(MX6SL_BRD_WIFI_H_WAKE, "bcm43xx-wifi-h-wake");
+	gpio_direction_input(MX6SL_BRD_WIFI_H_WAKE);
+	// platform driver registration
+	init_bcm_wifi();
+}
 /*
  *Usually UOK and DOK should have separate
  *line to differentiate its behaviour (with different
@@ -1580,13 +1597,12 @@ static void mx6sl_evk_suspend_exit()
  */
 static void __init mx6_evk_init(void)
 {
-	u32 i;
-
 	mxc_iomux_v3_setup_multiple_pads(mx6sl_brd_pads,
 					ARRAY_SIZE(mx6sl_brd_pads));
 
 	ft5x0x_ts_init();
 	mma8x5x_gsensor_init();
+	bcm43xx_init();
 
 	gp_reg_id = mx6sl_evk_dvfscore_data.reg_id;
 	soc_reg_id = mx6sl_evk_dvfscore_data.soc_id;
@@ -1698,7 +1714,6 @@ static void __init mx6_evk_init(void)
 	if (imx_ion_data.heaps[0].size)
 		platform_device_register_resndata(NULL, "ion-mxc", 0, NULL, 0, \
 		&imx_ion_data, sizeof(imx_ion_data) + sizeof(struct ion_platform_heap));
-
 }
 
 extern void __iomem *twd_base;

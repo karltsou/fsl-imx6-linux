@@ -34,6 +34,9 @@
 #define ESDHC_CLOCK_HCKEN	0x00000002
 #define ESDHC_CLOCK_IPGEN	0x00000001
 
+#define SDHCI_VENDOR_SPEC	0xC0
+#define SDHCI_VENDOR_SPEC_FRC_SDCLK_ON (1 << 8)
+
 /* pltfm-specific */
 #define ESDHC_HOST_CONTROL_LE	0x20
 
@@ -102,6 +105,14 @@ static inline void esdhc_set_clock(struct sdhci_host *host, unsigned int clock)
 	}
 out:
 	host->clock = clock;
+
+	/* Disable Clock Gate */
+	if (boarddata->keep_clock) {
+		dev_dbg(mmc_dev(host->mmc), "disable clock gated off\n");
+		temp = readl(host->ioaddr + SDHCI_VENDOR_SPEC);
+		writel(temp | SDHCI_VENDOR_SPEC_FRC_SDCLK_ON,
+				host->ioaddr + SDHCI_VENDOR_SPEC);
+	}
 }
 
 #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */
