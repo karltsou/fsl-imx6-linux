@@ -99,6 +99,8 @@
 #define MX6SL_BRD_WIFI_D_WAKE		IMX_GPIO_NR(2, 7)
 #define MX6SL_BRD_WIFI_H_WAKE		IMX_GPIO_NR(2, 8)
 #define MX6SL_BRD_BT_H_WAKE		IMX_GPIO_NR(2, 9)
+/* Audio codec wm8962 1.8v */
+#define MX6SL_BRD_AUDIO_1_8V_ENABLE	IMX_GPIO_NR(3, 28)
 
 static iomux_v3_cfg_t mx6sl_brd_pads[] = {
 
@@ -410,6 +412,10 @@ static iomux_v3_cfg_t mx6sl_brd_bcm43xx_pads[] = {
 	MX6SL_PAD_EPDC_PWRCTRL0__GPIO_2_7,       /* WIFI D WAKE */
 	MX6SL_PAD_EPDC_PWRCTRL1__GPIO_2_8,       /* WIFI H WAKE */
 	MX6SL_PAD_EPDC_PWRCTRL2__GPIO_2_9        /* BT H WAKE   */
+};
+/* Audio codec wm8962 1.8v */
+static iomux_v3_cfg_t mx6sl_brd_wm8962_pads[] = {
+	MX6SL_PAD_KEY_COL2__GPIO_3_28		/* AUO_EN */
 };
 static iomux_v3_cfg_t suspend_enter_pads[] = {
 	/* Audio pads. */

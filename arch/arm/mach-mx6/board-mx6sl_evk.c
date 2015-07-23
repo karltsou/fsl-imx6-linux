@@ -564,17 +564,6 @@ static int mxc_wm8962_init(void)
 	clk_set_rate(extern_audio_root, 24000000);
 
 	wm8962_data.sysclk = rate;
-	/* set AUDMUX pads to 1.8v */
-	mxc_iomux_set_specialbits_register(MX6SL_PAD_AUD_MCLK,
-					PAD_CTL_LVE, PAD_CTL_LVE_MASK);
-	mxc_iomux_set_specialbits_register(MX6SL_PAD_AUD_RXD,
-					PAD_CTL_LVE, PAD_CTL_LVE_MASK);
-	mxc_iomux_set_specialbits_register(MX6SL_PAD_AUD_TXC,
-					PAD_CTL_LVE, PAD_CTL_LVE_MASK);
-	mxc_iomux_set_specialbits_register(MX6SL_PAD_AUD_TXD,
-					PAD_CTL_LVE, PAD_CTL_LVE_MASK);
-	mxc_iomux_set_specialbits_register(MX6SL_PAD_AUD_TXFS,
-					PAD_CTL_LVE, PAD_CTL_LVE_MASK);
 
 	return 0;
 }
@@ -583,7 +572,7 @@ static struct mxc_audio_platform_data wm8962_data = {
 	.ssi_num = 1,
 	.src_port = 2,
 	.ext_port = 3,
-	.hp_gpio = MX6_BRD_HEADPHONE_DET,
+	.hp_gpio = -1,
 	.hp_active_low = 1,
 	.mic_gpio = -1,
 	.mic_active_low = 1,
@@ -624,7 +613,11 @@ static struct platform_device sabresd_vwm8962_reg_devices = {
 
 static int __init imx6q_init_audio(void)
 {
-	platform_device_register(&sabresd_vwm8962_reg_devices);
+	mxc_iomux_v3_setup_multiple_pads(mx6sl_brd_wm8962_pads,
+				ARRAY_SIZE(mx6sl_brd_wm8962_pads));
+	gpio_request(MX6SL_BRD_AUDIO_1_8V_ENABLE, "imx-wm8962_v1_8");
+	gpio_direction_output(MX6SL_BRD_AUDIO_1_8V_ENABLE, 1);
+	gpio_free(MX6SL_BRD_AUDIO_1_8V_ENABLE);
 	mxc_register_device(&mx6_sabresd_audio_wm8962_device,
 			    &wm8962_data);
 	imx6q_add_imx_ssi(1, &mx6_sabresd_ssi_pdata);
@@ -781,6 +774,10 @@ static struct i2c_board_info mxc_i2c0_board_info[] __initdata = {
 		I2C_BOARD_INFO("max17135", 0x48),
 		.platform_data = &max17135_pdata,
 	},
+	{
+		I2C_BOARD_INFO("wm8962", 0x1a),
+		.platform_data = &wm8962_config_data,
+	},
 };
 
 static struct i2c_board_info mxc_i2c1_board_info[] __initdata = {
@@ -795,10 +792,6 @@ static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
 		I2C_BOARD_INFO("mma8x5x", 0x1c),
 		.irq = gpio_to_irq(MX6SL_BRD_GSENSOR_INT),
 		.platform_data = &gsensor_data,
-	},
-	{
-		I2C_BOARD_INFO("wm8962", 0x1a),
-		.platform_data = &wm8962_config_data,
 	},
 };
 
@@ -1698,12 +1691,6 @@ static void __init mx6_evk_init(void)
 	imx6sl_add_dcp();
 	imx6sl_add_rngb();
 	imx6sl_add_imx_pxp_v4l2();
-
-	mxc_spdif_data.spdif_core_clk = clk_get_sys("mxc_spdif.0", NULL);
-	clk_put(mxc_spdif_data.spdif_core_clk);
-	imx6q_add_spdif(&mxc_spdif_data);
-	imx6q_add_spdif_dai();
-	imx6q_add_spdif_audio_device();
 
 	imx6q_add_perfmon(0);
 	imx6q_add_perfmon(1);
