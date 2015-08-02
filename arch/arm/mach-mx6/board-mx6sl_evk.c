@@ -538,6 +538,8 @@ static int wm8962_clk_enable(int enable)
 }
 
 static struct wm8962_pdata wm8962_config_data = {
+	.gpio_init[2] = 0x13,               /* GPIO3: digital microphone clock output  */
+	.gpio_init[4] = 0x8014,             /* GPIO5: digital microphone data as input */
 	.clock_enable = wm8962_clk_enable,
 };
 
@@ -615,11 +617,15 @@ static int __init imx6q_init_audio(void)
 {
 	mxc_iomux_v3_setup_multiple_pads(mx6sl_brd_wm8962_pads,
 				ARRAY_SIZE(mx6sl_brd_wm8962_pads));
+
+	/* audio codec 1.8v enabled */
 	gpio_request(MX6SL_BRD_AUDIO_1_8V_ENABLE, "imx-wm8962_v1_8");
 	gpio_direction_output(MX6SL_BRD_AUDIO_1_8V_ENABLE, 1);
 	gpio_free(MX6SL_BRD_AUDIO_1_8V_ENABLE);
+
 	mxc_register_device(&mx6_sabresd_audio_wm8962_device,
 			    &wm8962_data);
+
 	imx6q_add_imx_ssi(1, &mx6_sabresd_ssi_pdata);
 
 	return 0;

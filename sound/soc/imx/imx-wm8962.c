@@ -437,7 +437,7 @@ static int imx_wm8962_init(struct snd_soc_pcm_runtime *rtd)
 	snd_soc_dapm_add_routes(&codec->dapm, audio_map, ARRAY_SIZE(audio_map));
 
 	snd_soc_dapm_enable_pin(&codec->dapm, "Ext Spk");
-	snd_soc_dapm_enable_pin(&codec->dapm, "AMIC");
+	snd_soc_dapm_enable_pin(&codec->dapm, "DMIC");
 
 	if (plat->hp_gpio != -1) {
 		imx_hp_jack_gpio.gpio = plat->hp_gpio;
@@ -483,8 +483,6 @@ static int imx_wm8962_init(struct snd_soc_pcm_runtime *rtd)
 			ret = -EINVAL;
 			return ret;
 		}
-	} else {
-		snd_soc_dapm_nc_pin(&codec->dapm, "DMIC");
 	}
 
 	snd_soc_dapm_sync(&codec->dapm);
@@ -621,7 +619,7 @@ static int __init imx_asoc_init(void)
 	if (machine_is_mx6q_sabresd())
 		imx_dai[0].codec_name = "wm8962.0-001a";
 	else if (machine_is_mx6sl_arm2() | machine_is_mx6sl_evk())
-		imx_dai[0].codec_name = "wm8962.1-001a";
+		imx_dai[0].codec_name = "wm8962.0-001a";
 
 	imx_snd_device = platform_device_alloc("soc-audio", 5);
 	if (!imx_snd_device)
