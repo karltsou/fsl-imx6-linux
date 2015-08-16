@@ -188,7 +188,7 @@ int bcm_wifi_set_power(int enable)
 {
 	int ret = 0;
 
-	gpio_request(MX6SL_BRD_WIFI_REG_ON, "bcm43xx-wifi-reg-on");
+	gpio_request(MX6SL_BRD_WIFI_REG_ON, "wl-reg-on");
 	if (enable) {
 		gpio_direction_output(MX6SL_BRD_WIFI_REG_ON, 1);
 		/* WLAN chip to reset */
@@ -584,8 +584,8 @@ static struct wifi_platform_data bcm_wifi_control = {
 static struct resource wifi_resource[] = {
 	[0] = {
 		.name = "bcmdhd_wlan_irq",
-		.start = gpio_to_irq(MX6SL_BRD_WIFI_H_WAKE),
-		.end   = gpio_to_irq(MX6SL_BRD_WIFI_H_WAKE),
+		.start = gpio_to_irq(MX6SL_BRD_WIFI_HOST_WAKE),
+		.end   = gpio_to_irq(MX6SL_BRD_WIFI_HOST_WAKE),
 		.flags = IORESOURCE_IRQ | IORESOURCE_IRQ_HIGHLEVEL | IORESOURCE_IRQ_SHAREABLE, // for HW_OOB
 	},
 };

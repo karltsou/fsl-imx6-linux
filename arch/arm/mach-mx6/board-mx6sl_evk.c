@@ -276,7 +276,6 @@ static const struct esdhc_platform_data mx6_evk_sd3_data __initconst = {
 	.support_18v		= 0,
 	.platform_pad_change = plt_sd_pad_change,
 	.cd_type = ESDHC_CD_CONTROLLER,
-	.keep_clock		= 1,
 };
 
 #define mV_to_uV(mV) (mV * 1000)
@@ -1445,16 +1444,9 @@ static void __init bcm43xx_init(void)
 	mxc_iomux_v3_setup_multiple_pads(mx6sl_brd_bcm43xx_pads,
 					ARRAY_SIZE(mx6sl_brd_bcm43xx_pads));
 
-	gpio_request(MX6SL_BRD_BT_REG_ON, "bcm43xx-bt-reg-on");
-	gpio_direction_output(MX6SL_BRD_BT_REG_ON, 0);
-	gpio_request(MX6SL_BRD_BT_D_WAKE, "bcm43xx-bt-d-wake");
-	gpio_direction_output(MX6SL_BRD_BT_D_WAKE, 0);
-	gpio_request(MX6SL_BRD_BT_H_WAKE, "bcm43xx-bt-h-wake");
-	gpio_direction_input(MX6SL_BRD_BT_H_WAKE);
-	gpio_request(MX6SL_BRD_WIFI_D_WAKE, "bcm43xx-wifi-d-wake");
-	gpio_direction_output(MX6SL_BRD_WIFI_D_WAKE, 1);
-	gpio_request(MX6SL_BRD_WIFI_H_WAKE, "bcm43xx-wifi-h-wake");
-	gpio_direction_input(MX6SL_BRD_WIFI_H_WAKE);
+	gpio_request(MX6SL_BRD_WIFI_REG_ON, "wl-reg-on");
+	gpio_direction_output(MX6SL_BRD_WIFI_REG_ON, 1);
+
 	// platform driver registration
 	init_bcm_wifi();
 }
@@ -1601,10 +1593,6 @@ static void __init mx6_evk_init(void)
 	mxc_iomux_v3_setup_multiple_pads(mx6sl_brd_pads,
 					ARRAY_SIZE(mx6sl_brd_pads));
 
-	ft5x0x_ts_init();
-	mma8x5x_gsensor_init();
-	bcm43xx_init();
-
 	gp_reg_id = mx6sl_evk_dvfscore_data.reg_id;
 	soc_reg_id = mx6sl_evk_dvfscore_data.soc_id;
 
@@ -1639,6 +1627,9 @@ static void __init mx6_evk_init(void)
 	mxc_iomux_set_gpr_register(1, 17, 2, 0);
 
 	//imx6_init_fec(fec_data);
+
+	/* wifi module initialization */
+        bcm43xx_init();
 
 	platform_device_register(&evk_vmmc_reg_devices);
 	imx6q_add_sdhci_usdhc_imx(0, &mx6_evk_sd1_data);
@@ -1692,7 +1683,13 @@ static void __init mx6_evk_init(void)
 	imx6q_add_imx2_wdt(0, NULL);
 
 	imx_add_viv_gpu(&imx6_gpu_data, &imx6q_gpu_pdata);
+
 	//imx6sl_add_imx_keypad(&mx6sl_evk_map_data);
+
+	/* custom board external devices init */
+	ft5x0x_ts_init();
+	mma8x5x_gsensor_init();
+
 	imx6q_add_busfreq();
 	imx6sl_add_dcp();
 	imx6sl_add_rngb();
@@ -1701,6 +1698,7 @@ static void __init mx6_evk_init(void)
 	imx6q_add_perfmon(0);
 	imx6q_add_perfmon(1);
 	imx6q_add_perfmon(2);
+
 	/* Register charger chips */
 	platform_device_register(&evk_max8903_charger_1);
 	pm_power_off = mx6_snvs_poweroff;
